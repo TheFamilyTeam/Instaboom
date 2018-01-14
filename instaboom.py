@@ -54,7 +54,7 @@ def main(uid):
 			pass
 
 if __name__ == '__main__':
-	print(u'\u2500'*50+'\n# Instaboom [DEV] b1.2')
+	print('-'*50+'\n# Instaboom [DEV] b1.2')
 	uid = ''
 	threads = 0
 	try:
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 		proxy = open(pxl, 'rb').read().split('\n')
 		fff = requests.get('https://www.instagram.com/' + usr).text
 		uid = fff.split(', "id": "')[1].split('"')[0]
-		print('# Botting @' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+u'\u2500'*50)
+		print('# Botting @' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
 	except Exception as e:
 		print("# Something went wrong: " + str(e))
 		exit(1)
