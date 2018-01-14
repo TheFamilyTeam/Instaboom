@@ -65,8 +65,8 @@ if __name__ == '__main__':
 		fff = requests.get('https://www.instagram.com/' + usr).text
 		uid = fff.split(', "id": "')[1].split('"')[0]
 		print('# Botting @' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+u'\u2500'*50)
-	except:
-		print("# Something went wrong")
+	except Exception as e:
+		print("# Something went wrong: " + str(e))
 		exit(1)
 	for x in range(0,threads):
 		t = threading.Thread(target=main, args=(uid,),)
