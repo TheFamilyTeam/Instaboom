@@ -61,7 +61,7 @@ if __name__ == '__main__':
 		usr = sys.argv[1]
 		threads = int(sys.argv[2])
 		pxl = sys.argv[3]
-		proxy = open(pxl, 'rb').read().split('\n')
+		proxy = open(pxl, 'r').read().split('\n')
 		fff = requests.get('https://www.instagram.com/' + usr).text
 		uid = fff.split(', "id": "')[1].split('"')[0]
 		print('# Botting @' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
