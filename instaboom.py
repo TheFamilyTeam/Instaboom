@@ -28,7 +28,10 @@ def check(data, user, proxy):
 def follow(data, user, proxy):
 	return requests.post('https://www.instagram.com/web/friendships/'+user+'/follow/', proxies=proxy, cookies=data.cookies, headers={'referer':'https://www.instagram.com', 'origin':'https://www.instagram.com/', 'x-csrftoken':data.cookies['csrftoken'], 'x-instagram-ajax': '1', 'x-requested-with': 'XMLHttpRequest', 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1'}).status_code
 
-def job(uid):
+def like(data, user, proxy):
+	return requests.post('https://www.instagram.com/web/likes/'+user+'/like/', proxies=proxy, cookies=data.cookies, headers={'referer':'https://www.instagram.com', 'origin':'https://www.instagram.com/', 'x-csrftoken':data.cookies['csrftoken'], 'x-instagram-ajax': '1', 'x-requested-with': 'XMLHttpRequest', 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1'}).status_code
+
+def job(uid, mode):
 	global proxy
 	pxy = random.choice(proxy)
 	if "~" in pxy:
@@ -40,35 +43,51 @@ def job(uid):
 
 	if data['account_created'] == True:
 		safe_print('Account created successfully: @' + user)
-		a=follow(registerx, uid, pxyd)
-		safe_print('Followed by @' + user + ' (' + str(a) + ')')
+		a = 0
+		if mode == 'f':
+			a = follow(registerx, uid, pxyd)
+		elif mode == 'l':
+			a = like(registerx, uid, pxyd)
+		b = ('ACCEPTED' if a==200 else 'DECLINED')
+		safe_print('Followed by @' + user + ' (' + b + ')')
 	else:
 		pass
 		#do whatever you want
 
-def main(uid):
+def main(uid, mode):
 	while True:
 		try:
-			job(uid)
+			job(uid, mode)
 		except Exception as e:
 			pass
 
 if __name__ == '__main__':
-	print('-'*50+'\n# Instaboom [DEV] b1.2')
+	print('-'*50+'\n# Instaboom [DEV] b1.3')
 	uid = ''
 	threads = 0
+	mode = ''
 	try:
 		usr = sys.argv[1]
 		threads = int(sys.argv[2])
 		pxl = sys.argv[3]
+		mode = sys.argv[4]
 		proxy = open(pxl, 'r').read().split('\n')
-		fff = requests.get('https://www.instagram.com/' + usr).text
-		uid = fff.split(', "id": "')[1].split('"')[0]
-		print('# Botting @' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
+		
+		if mode == 'f':
+			fff = requests.get('https://www.instagram.com/' + usr).text
+			uid = fff.split(', "id": "')[1].split('"')[0]
+			print('# Botting @' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
+		elif mode == 'l':
+			fff = requests.get('https://www.instagram.com/p/' + usr).text
+			uid = fff.split('instagram://media?id=')[1].split('"')[0]
+			print('# Botting likes on ' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
+		else:
+			print('# What? Modes: l (like), f (follow)')
+			exit(1)
 	except Exception as e:
-		print("# Something went wrong: " + str(e))
+		print("# Something went wrong : " + str(e) + "\npython instaboom.py <account/post> <threads> <proxy file> <mode>")
 		exit(1)
 	for x in range(0,threads):
-		t = threading.Thread(target=main, args=(uid,),)
+		t = threading.Thread(target=main, args=(uid,mode,),)
 		t.start()	
 	
