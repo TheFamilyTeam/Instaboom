@@ -93,7 +93,7 @@ if __name__ == '__main__':
 		elif mode == 'c':
 			fff = requests.get('https://www.instagram.com/p/' + usr).text
 			uid = fff.split('instagram://media?id=')[1].split('"')[0]
-			cm = input("comment: ")
+			cm = raw_input("comment: ")
 			print('# Botting comments on ' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
 		else:
 			print('# What? Modes: l (like), f (follow), c (comment)')
