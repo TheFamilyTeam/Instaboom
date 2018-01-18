@@ -47,14 +47,18 @@ def job(uid, mode):
 	if data['account_created'] == True:
 		safe_print('Account created successfully: @' + user)
 		a = 0
+		tx = ''
 		if mode == 'f':
 			a = follow(registerx, uid, pxyd)
+			tx = 'Followed'
 		elif mode == 'l':
 			a = like(registerx, uid, pxyd)
+			tx = 'Liked'
 		elif mode == 'c':
 			a = comment(registerx, uid, pxyd, cm)
+			tx = 'Commented'
 		b = ('ACCEPTED' if a==200 else 'DECLINED')
-		safe_print('Followed by @' + user + ' (' + b + ')')
+		safe_print(tx+' by @' + user + ' (' + b + ')')
 	else:
 		pass
 		#do whatever you want
