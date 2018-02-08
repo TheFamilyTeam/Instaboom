@@ -84,7 +84,7 @@ if __name__ == '__main__':
 		
 		if mode == 'f':
 			fff = requests.get('https://www.instagram.com/' + usr).text
-			uid = fff.split(', "id": "')[1].split('"')[0]
+			uid = fff.split('"id":"')[1].split('"')[0]
 			print('# Botting @' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
 		elif mode == 'l':
 			fff = requests.get('https://www.instagram.com/p/' + usr).text
