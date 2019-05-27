@@ -1,110 +1,224 @@
-# -*- coding: utf-8 -*-
+import argparse
 import requests
-import json
 import random
 import sys
-import threading
-import time
 
-parole = requests.get('https://raw.githubusercontent.com/dominictarr/random-name/master/first-names.txt').text.split('\r\n')
-proxy = []
+class Instaboom:
+	s = requests.session()
+	def __init__(self, proxy):
+		self.s.headers = {
+			'accept-encoding': 'gzip, deflate, br',
+			'accept-language': 'en-US,en;q=0.9',
+			'Referer': 'https://www.instagram.com',
+			'Origin': 'https://www.instagram.com',
+			'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1',
+			'Accept': '*/*',
+			'x-requested-with': 'XMLHttpRequest',
+		}
+		self.s.cookies['ig_cb'] = '1'
+		if proxy is not None:
+			self.s.proxies = {"http": "http://" + proxy, "https":"https://" + proxy, "ftp":"ftp://" + proxy}
+		f = self.s.get('https://www.instagram.com/web/__mid/')
+	
+	def randomInfo(self):
+		nomi = [
+			'Francesco', 'Leonardo', 'Alessandro',
+			'Lorenzo', 'Mattia', 'Andrea',
+			'Gabriele', 'Riccardo', 'Matteo',
+			'Tommaso', 'Edoardo', 'Federico',
+			'Giuseppe', 'Antonio', 'Diego', 'Nicolo\'',
+			'Giovanni', 'Samuele', 'Pietro',
+			'Marco', 'Filippo', 'Luca',
+			'Michele', 'Simone', 'Alessio',
+			'Gabriel', 'Emanuele', 'Giulio',
+			'Salvatore', 'Vincenzo', 'Jacopo',
+			'Manuel', 'Giacomo', 'Gioele',
+			'Thomas', 'Daniele', 'Cristian',
+			'Elia', 'Samuel', 'Giorgio',
+			'Enea', 'Luigi', 'Daniel',
+			'Nicola', 'Stefano', 'Domenico',
+			'Raffaele', 'Kevin', 'Sofia',
+			'Giulia', 'Aurora', 'Alice',
+			'Ginevra', 'Emma', 'Giorgia',
+			'Greta', 'Martina', 'Beatrice',
+			'Anna', 'Chiara', 'Sara',
+			'Nicole', 'Ludovica', 'Gaia',
+			'Matilde', 'Vittoria', 'Noemi', 
+			'Francesca', 'Alessia', 'Camilla',
+			'Bianca', 'Arianna', 'Rebecca',
+			'Elena', 'Viola', 'Mia',
+			'Elisa', 'Giada', 'Adele',
+			'Marta', 'Isabel', 'Melissa',
+			'Carlotta', 'Eleonora', 'Miriam',
+			'Emily', 'Irene', 'Margherita',
+			'Anita', 'Benedetta','Caterina',
+			'Azzurra', 'Eva', 'Rachele', 'Cecilia'
+		]
+		
+		cognomi = [
+			'Rossi', 'Russo', 'Ferrari', 
+			'Esposito', 'Bianchi', 'Romano', 
+			'Colombo', 'Ricci', 'Marino', 
+			'Greco', 'Bruno', 'Gallo', 
+			'Conti', 'DeLuca', 'Mancini', 
+			'Costa', 'Giordano', 'Rizzo', 
+			'Lombardi', 'Moretti', 'Barbieri', 
+			'Fontana', 'Santoro', 'Mariani', 
+			'Rinaldi', 'Caruso', 'Ferrara', 
+			'Galli', 'Martini', 'Leone', 
+			'Longo', 'Gentile', 'Martinelli', 
+			'Vitale', 'Lombardo', 'Serra', 
+			'Coppola', 'DeSantis', 'Dangelo', 
+			'Marchetti', 'Parisi', 'Villa', 
+			'Conte', 'Ferraro', 'Ferri', 
+			'Fabbri', 'Bianco', 'Marini', 
+			'Grasso', 'Valentini', 'Messina', 
+			'Sala', 'DeAngelis', 'Gatti', 
+			'Pellegrini', 'Palumbo', 'Sanna', 
+			'Farina', 'Rizzi', 'Monti', 
+			'Cattaneo', 'Morelli', 'Amato', 
+			'Silvestri', 'Mazza', 'Testa', 
+			'Grassi', 'Pellegrino', 'Carbone', 
+			'Giuliani', 'Benedetti', 'Barone', 
+			'Rossetti', 'Caputo', 'Montanari', 
+			'Guerra', 'Palmieri', 'Bernardi', 
+			'Martino', 'Fiore', 'DeRosa', 
+			'Ferretti', 'Bellini', 'Basile', 
+			'Riva', 'Donati', 'Piras', 
+			'Vitali', 'Battaglia', 'Sartori', 
+			'Neri', 'Costantini', 'Milani', 
+			'Pagano', 'Ruggiero', 'Sorrentino', 
+			'Damico', 'Orlando', 'Damico', 'Negri'
+		]
+		
+		formati = ['._%s', '.%s', '_%s', '__%s', '._.%s', '_.%s']
+		domini = ['gmail.com', 'libero.it', 'alice.it', 'tim.it', 'tiscali.it']
+		anni = [str(x) for x in range(2000, 2006)]
+		nome = random.choice(nomi)
+		anno = random.choice(anni)
+		cognome = random.choice(cognomi)
+		formato = random.choice(formati)
+		username = '%s%s%s%s' % (nome.lower(), cognome.lower(), str(random.randint(0, 1000)), formato % anno)
+		email = '%s%s%s@%s' % (nome.lower(), cognome.lower(), str(random.randint(0, 1000)), random.choice(domini))
+		password = '%s%s_%s' % (nome, anno[2:], str(random.randint(0, 1000)))
+		return {"nome": nome, "cognome": cognome, "anno": anno, "username": username, "email": email, "password": password, "nc": "%s %s" % (nome, cognome)}
 
-def safe_print(content):
-	print("{0}".format(content))
+	def login(self, username, password):
+		self.s.headers['x-instagram-ajax'] = 'f4c28142cf13'
+		self.s.headers['x-ig-app-id'] = '936619743392459'
+		self.s.headers['x-csrftoken'] = self.s.cookies['csrftoken']
+		self.s.headers['referer'] = 'https://www.instagram.com/accounts/login/?source=auth_switcher'
+		self.s.headers['content-type'] = 'application/x-www-form-urlencoded'
+		data = {
+			'username': username,
+			'password': password,
+			'queryParams': '{"source":"auth_switcher"}',
+			'optIntoOneTap': 'true'
+		}
+		return self.s.post('https://www.instagram.com/accounts/login/ajax/', data=data).json()
 
-def randomUsername():
-	global parole
-	return random.choice(parole).lower() + str(random.randint(1000,9000)) + 'ib'
+	def register(self, email, username, password, first_name):
+		self.s.headers['x-instagram-ajax'] = 'f4c28142cf13'
+		self.s.headers['x-ig-app-id'] = '936619743392459'
+		self.s.headers['x-csrftoken'] = self.s.cookies['csrftoken']
+		self.s.headers['referer'] = 'https://www.instagram.com/accounts/login/?source=auth_switcher'
+		self.s.headers['content-type'] = 'application/x-www-form-urlencoded'
+		data = {
+			'email': email,
+			'password': password,
+			'username': username,
+			'first_name': first_name,
+			'client_id': self.s.cookies['mid'],
+			'seamless_login_enabled': '1',
+			'gdpr_s': '[0,2,0,null]',
+			'tos_version': 'eu',
+			'opt_into_one_tap': 'false'
+		}
+		return self.s.post('https://www.instagram.com/accounts/web_create_ajax/', data=data).json()
+	
+	def follow(self, username):
+		self.s.headers['x-instagram-ajax'] = 'f4c28142cf13'
+		self.s.headers['x-ig-app-id'] = '936619743392459'
+		self.s.headers['x-csrftoken'] = self.s.cookies['csrftoken']
+		self.s.headers['referer'] = 'https://www.instagram.com/' + username
+		self.s.headers['content-type'] = 'application/x-www-form-urlencoded'
+		r = requests.get('https://instagram.com/' + username).text
+		userId = r.split('profilePage_')[1].split('"')[0]
+		flw = self.s.post('https://www.instagram.com/web/friendships/%s/follow/' % userId)
+		return flw.json()
+	
+	def like(self, postId):
+		self.s.headers['x-instagram-ajax'] = 'f4c28142cf13'
+		self.s.headers['x-ig-app-id'] = '936619743392459'
+		self.s.headers['x-csrftoken'] = self.s.cookies['csrftoken']
+		self.s.headers['referer'] = 'https://www.instagram.com/p/' + postId
+		self.s.headers['content-type'] = 'application/x-www-form-urlencoded'
+		r = requests.get('https://instagram.com/p/' + postId).text
+		id = r.split('<meta property="al:ios:url" content="instagram://media?id=')[1].split('"')[0]
+		like = self.s.post('https://www.instagram.com/web/likes/%s/like/' % id)
+		return like.json()
 
-def cookie(proxy):
-	return requests.get('https://www.instagram.com/accounts/login', proxies=proxy, headers={'referer':'https://www.instagram.com', 'origin':'https://www.instagram.com/', 'user-agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1'})
-
-def register(data, user, proxy):
-	return requests.post('https://www.instagram.com/accounts/web_create_ajax/', proxies=proxy, headers={'referer':'https://www.instagram.com/accounts/login', 'origin':'https://www.instagram.com/', 'x-csrftoken':data.cookies['csrftoken'], 'x-instagram-ajax': '1', 'x-requested-with': 'XMLHttpRequest', 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1'}, cookies=data.cookies, data={'email':user+'@gmail.com', 'password':user+'x', 'username':user, 'fullName':user})
-
-def check(data, user, proxy):
-	return requests.post('https://www.instagram.com/accounts/web_create_ajax/attempt/', proxies=proxy, headers={'referer':'https://www.instagram.com/accounts/login', 'origin':'https://www.instagram.com/', 'x-csrftoken':data.cookies['csrftoken'], 'x-instagram-ajax': '1', 'x-requested-with': 'XMLHttpRequest', 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1'}, cookies=data.cookies, data={'email':user+'@gmail.com', 'password':user+'x', 'username':user, 'first_name':user})
-
-def follow(data, user, proxy):
-	return requests.post('https://www.instagram.com/web/friendships/'+user+'/follow/', proxies=proxy, cookies=data.cookies, headers={'referer':'https://www.instagram.com', 'origin':'https://www.instagram.com/', 'x-csrftoken':data.cookies['csrftoken'], 'x-instagram-ajax': '1', 'x-requested-with': 'XMLHttpRequest', 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1'}).status_code
-
-def comment(data, user, proxy, commento):
-	return requests.post('https://www.instagram.com/web/comments/'+user+'/add/', proxies=proxy, cookies=data.cookies, headers={'referer':'https://www.instagram.com', 'origin':'https://www.instagram.com/', 'x-csrftoken':data.cookies['csrftoken'], 'x-instagram-ajax': '1', 'x-requested-with': 'XMLHttpRequest', 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1'}, data={'comment_text':commento}).status_code
-
-def like(data, user, proxy):
-	return requests.post('https://www.instagram.com/web/likes/'+user+'/like/', proxies=proxy, cookies=data.cookies, headers={'referer':'https://www.instagram.com', 'origin':'https://www.instagram.com/', 'x-csrftoken':data.cookies['csrftoken'], 'x-instagram-ajax': '1', 'x-requested-with': 'XMLHttpRequest', 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0_1 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A402 Safari/604.1'}).status_code
-
-def job(uid, mode):
-	global proxy
-	pxy = random.choice(proxy)
-	if "~" in pxy:
-		pxy = pxy.split("~")[0]
-	pxyd = {"http":"http://"+pxy, "https":"https://"+pxy, "ftp":"ftp://"+pxy}
-	user = randomUsername()
-	registerx = register(cookie(pxyd), user, pxyd)
-	data = json.loads(registerx.text)
-
-	if data['account_created'] == True:
-		safe_print('Account created successfully: @' + user)
-		a = 0
-		tx = ''
-		if mode == 'f':
-			a = follow(registerx, uid, pxyd)
-			tx = 'Followed'
-		elif mode == 'l':
-			a = like(registerx, uid, pxyd)
-			tx = 'Liked'
-		elif mode == 'c':
-			a = comment(registerx, uid, pxyd, cm)
-			tx = 'Commented'
-		b = ('ACCEPTED' if a==200 else 'DECLINED')
-		safe_print(tx+' by @' + user + ' (' + b + ')')
-	else:
-		pass
-		#do whatever you want
-
-def main(uid, mode):
-	while True:
-		try:
-			job(uid, mode)
-		except Exception as e:
-			pass
+def usage(r):
+	print("[!] %s\n[i] Usage: python %s -m <mode, follow/like> -u <user, follow only> -pi <post, like only> -p <proxy list>" % (r, " ".join(sys.argv)))
 
 if __name__ == '__main__':
-	print('-'*50+'\n# Instaboom [DEV] b1.3')
-	uid = ''
-	threads = 0
-	mode = ''
-	try:
-		usr = sys.argv[1]
-		threads = int(sys.argv[2])
-		pxl = sys.argv[3]
-		mode = sys.argv[4]
-		proxy = open(pxl, 'r').read().split('\n')
-		
-		if mode == 'f':
-			fff = requests.get('https://www.instagram.com/' + usr).text
-			uid = fff.split('"id":"')[1].split('"')[0]
-			print('# Botting @' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
-		elif mode == 'l':
-			fff = requests.get('https://www.instagram.com/p/' + usr).text
-			uid = fff.split('instagram://media?id=')[1].split('"')[0]
-			print('# Botting likes on ' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
-		elif mode == 'c':
-			fff = requests.get('https://www.instagram.com/p/' + usr).text
-			uid = fff.split('instagram://media?id=')[1].split('"')[0]
-			if sys.version_info[0] < 3:
-				cm = raw_input("comment: ")
-			elif sys.version_info[0] >= 3:
-				cm = input("comment: ")
-			print('# Botting comments on ' + usr + ' (' + uid + ') with '+str(threads)+' threads and ' + str(len(proxy)) + ' proxies'+'\n'+'-'*50)
+	parser = argparse.ArgumentParser(description='Instaboom - Instagram follow bot')
+	parser.add_argument('-mode', '-m', help='bot mode', action='store')
+	parser.add_argument('-user', '-u', help='user to follow', action='store')
+	parser.add_argument('-post', '-pi', help='post id to like', action='store')
+	parser.add_argument('-proxies', '-p', help='proxy list', action='store')
+	args = parser.parse_args()
+	
+	print("""
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  _____           _        _                           
+ |_   _|         | |      | |                          
+   | |  _ __  ___| |_ __ _| |__   ___   ___  _ __ ___  
+   | | | '_ \/ __| __/ _` | '_ \ / _ \ / _ \| '_ ` _ \ 
+  _| |_| | | \__ \ || (_| | |_) | (_) | (_) | | | | | |
+ |_____|_| |_|___/\__\__,_|_.__/ \___/ \___/|_| |_| |_| 3.0
+                                                       
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=""")
+	print("[i] Created by Neon and TheFamilyTeam")
+	print("[-] https://github.com/TheFamilyTeam")
+	print("[-] https://github.com/prefisso")
+	print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+	
+	if args.proxies:
+		proxy = random.choice(open(args.proxies, 'r').read().split('\n'))
+	else:
+		proxy = None
+	
+	if args.mode is None:
+		usage("No mode was specified")
+	elif args.mode == 'follow':
+		if args.user:
+			while True:
+				i = Instaboom(proxy)
+				data = i.randomInfo()
+				print('[***] Registering %s (%s)...' % (data['username'], data['nc']))
+				a = i.register(data['email'], data['username'], data['password'], data['nc'])
+				if a['account_created']:
+					print('[***] Following %s...\n' % args.user)
+					i.follow(args.user)
+				else:
+					print('[***] Instagram blocked the registration, reason: %s.\n' % ', '.join(a['errors'].keys()))
 		else:
-			print('# What? Modes: l (like), f (follow), c (comment)')
-			exit(1)
-	except Exception as e:
-		print("# Something went wrong : " + str(e) + "\npython instaboom.py <account/post> <threads> <proxy file> <mode>")
-		exit(1)
-	for x in range(0,threads):
-		t = threading.Thread(target=main, args=(uid,mode,),)
-		t.start()	
+			usage("No user was specified")
+	elif args.mode == 'like':
+		if args.post:
+			while True:
+				i = Instaboom(proxy)
+				data = i.randomInfo()
+				print('[***] Registering %s (%s)...' % (data['username'], data['nc']))
+				a = i.register(data['email'], data['username'], data['password'], data['nc'])
+				if a['account_created']:
+					print('[***] Liking %s...\n' % args.post)
+					i.like(args.post)
+				else:
+					print('[***] Instagram blocked the registration, reason: %s.\n' % ', '.join(a['errors'].keys()))
+		else:
+			usage("No post ID was specified")
+	else:
+		usage("Invalid mode")
 	
