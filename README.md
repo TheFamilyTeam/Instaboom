@@ -1,3 +1,6 @@
+**WARNING: This project is outdated and may not work right.**
+
+---------------------------------------------------------------
 # Instaboom
 Instagram follower bot
 
