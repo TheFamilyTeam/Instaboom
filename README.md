@@ -1,21 +1,23 @@
-**WARNING: This project is outdated and may not work right.**
+**WARNING: Instagram started to ban fake-bot-accounts, due to this, Instaboom may not work correctly.**
 
 ---------------------------------------------------------------
 # Instaboom
-Instagram follower bot
+Instagram follower/like bot, creates a new account everytime and follows/likes.
 
 # Dependencies
-[requests](https://pypi.python.org/pypi/requests)
+* requests
+* argparse
+* random
+* sys
 
 # Usage
-`python instaboom.py <username without @/post id> <number of threads> <proxy file name> <mode l/f/c>`
+`python instaboom.py -m <mode, follow/like> -u <user, follow only> -pi <post, like only> -p <proxy list>`
 
-note: you should use the username if you want to bot followers, use the post id instead if you want to bot likes.
+note: you must use the username if you want to bot followers, use the post id instead if you want to bot likes.
 
 # Modes
-* l = like
-* f = follow
-* c = comment
+* follow
+* like
 
 # Extra
 What the hell is a post id?
