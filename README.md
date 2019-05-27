@@ -18,6 +18,7 @@ note: you must use the username if you want to bot followers, use the post id in
 # Modes
 * follow
 * like
+* comment (_not available yet_)
 
 # Extra
 What the hell is a post id?
