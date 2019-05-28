@@ -1,6 +1,8 @@
+import threading
 import argparse
 import requests
 import random
+import time
 import sys
 
 class Instaboom:
@@ -159,14 +161,91 @@ class Instaboom:
 		return like.json()
 
 def usage(r):
-	print("[!] %s\n[i] Usage: python %s -m <mode, follow/like> -u <user, follow only> -pi <post, like only> -p <proxy list>" % (r, " ".join(sys.argv)))
+	print("[!] %s\n[i] Usage: python %s -m <mode, follow/like> -u <user, follow only> -pi <post, like only> -p <proxy list> -a <account list file, optional>" % (r, " ".join(sys.argv)))
+
+def lFollow(acc, i):
+	d = acc.rstrip().lstrip().split(':')
+	email = d[0]
+	password = d[1]
+	print('[***] Logging in %s...' % acc)
+	a = i.login(email, password)
+	if 'authenticated' in a:
+		if a['authenticated']:
+			print('[***] Following %s...\n' % args.user)
+			i.follow(args.user)
+	elif a['message'] == 'checkpoint_required':
+		print('[***] Instagram blocked the login, reason: locked account.\n')
+	elif['showAccountRecoveryModal']:
+		print('[***] Instagram blocked the login, reason: recovery mode.\n')
+	else:
+		print('[***] Instagram blocked the login, reason: wrong email/password.\n')
+
+def followThread(args):
+	if args.user:
+		i = Instaboom(proxy)
+		if not args.acclist:
+			while True:
+				data = i.randomInfo()
+				print('[***] Registering %s (%s)...' % (data['username'], data['nc']))
+				a = i.register(data['email'], data['username'], data['password'], data['nc'])
+				if a['account_created']:
+					print('[***] Following %s...\n' % args.user)
+					i.follow(args.user)
+				else:
+					print('[***] Instagram blocked the registration, reason: %s.\n' % ', '.join(a['errors'].keys()))
+		else:
+			accs = open(args.acclist, 'r').read().splitlines()
+			for acc in accs:
+				threading.Thread(target=lFollow, args=(acc, i,),).start()
+				time.sleep(0.25)
+	else:
+		usage("No user was specified")
+
+def lLike(acc, i):
+	d = acc.rstrip().lstrip().split(':')
+	email = d[0]
+	password = d[1]
+	print('[***] Logging in %s...' % acc)
+	a = i.login(email, password)
+	if 'authenticated' in a:
+		if a['authenticated']:
+			print('[***] Liking %s...\n' % args.post)
+			i.like(args.post)
+		elif a['message'] == 'checkpoint_required':
+			print('[***] Instagram blocked the login, reason: locked account.\n')
+		elif['showAccountRecoveryModal']:
+			print('[***] Instagram blocked the login, reason: recovery mode.\n')
+		else:
+			print('[***] Instagram blocked the login, reason: wrong email/password.\n')
+
+def likeThread(args):
+	if args.post:
+		i = Instaboom(proxy)
+		if not args.acclist:
+			while True:
+				data = i.randomInfo()
+				print('[***] Registering %s (%s)...' % (data['username'], data['nc']))
+				a = i.register(data['email'], data['username'], data['password'], data['nc'])
+				if a['account_created']:
+					print('[***] Liking %s...\n' % args.post)
+					i.like(args.post)
+				else:
+					print('[***] Instagram blocked the registration, reason: %s.\n' % ', '.join(a['errors'].keys()))
+		else:
+			accs = open(args.acclist, 'r').read().splitlines()
+			for acc in accs:
+				threading.Thread(target=lLike, args=(acc, i,),).start()
+				time.sleep(0.25)
+	else:
+		usage("No post ID was specified")
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Instaboom - Instagram follow bot')
 	parser.add_argument('-mode', '-m', help='bot mode', action='store')
 	parser.add_argument('-user', '-u', help='user to follow', action='store')
 	parser.add_argument('-post', '-pi', help='post id to like', action='store')
-	parser.add_argument('-proxies', '-p', help='proxy list', action='store')
+	parser.add_argument('-proxies', '-p', help='proxy list file', action='store')
+	parser.add_argument('-acclist', '-a', help='account list fle', action='store')
 	args = parser.parse_args()
 	
 	print("""
@@ -184,41 +263,20 @@ if __name__ == '__main__':
 	print("[-] https://github.com/prefisso")
 	print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 	
-	if args.proxies:
-		proxy = random.choice(open(args.proxies, 'r').read().split('\n'))
-	else:
-		proxy = None
-	
-	if args.mode is None:
-		usage("No mode was specified")
-	elif args.mode == 'follow':
-		if args.user:
-			while True:
-				i = Instaboom(proxy)
-				data = i.randomInfo()
-				print('[***] Registering %s (%s)...' % (data['username'], data['nc']))
-				a = i.register(data['email'], data['username'], data['password'], data['nc'])
-				if a['account_created']:
-					print('[***] Following %s...\n' % args.user)
-					i.follow(args.user)
-				else:
-					print('[***] Instagram blocked the registration, reason: %s.\n' % ', '.join(a['errors'].keys()))
+	try:
+		if args.proxies:
+			proxy = random.choice(open(args.proxies, 'r').read().split('\n'))
 		else:
-			usage("No user was specified")
-	elif args.mode == 'like':
-		if args.post:
-			while True:
-				i = Instaboom(proxy)
-				data = i.randomInfo()
-				print('[***] Registering %s (%s)...' % (data['username'], data['nc']))
-				a = i.register(data['email'], data['username'], data['password'], data['nc'])
-				if a['account_created']:
-					print('[***] Liking %s...\n' % args.post)
-					i.like(args.post)
-				else:
-					print('[***] Instagram blocked the registration, reason: %s.\n' % ', '.join(a['errors'].keys()))
+			proxy = None
+		
+		if args.mode is None:
+			usage("No mode was specified")
+		elif args.mode == 'follow':
+			threading.Thread(target=followThread, args=(args,),).start()
+		elif args.mode == 'like':
+			threading.Thread(target=likeThread, args=(args,),).start()
 		else:
-			usage("No post ID was specified")
-	else:
-		usage("Invalid mode")
+			usage("Invalid mode")
+	except Exception as e:
+		print('[!] Something went wrong: %s.' % e)
 	
