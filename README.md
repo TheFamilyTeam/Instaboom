@@ -11,7 +11,8 @@ Instagram follower/like bot, creates a new account everytime and follows/likes.
 * sys
 
 # Usage
-`python instaboom.py -m <mode, follow/like> -u <user, follow only> -pi <post, like only> -p <proxy list>`
+`python instaboom.py -m <mode, follow/like> -u <user, follow only> -pi <post, like only> -p <proxy list> -a <account list file, optional>
+`
 
 note: you must use the username if you want to bot followers, use the post id instead if you want to bot likes.
 
