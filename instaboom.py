@@ -19,6 +19,7 @@ class Instaboom:
 		}
 		self.s.cookies['ig_cb'] = '1'
 		if proxy is not None:
+			proxy = proxy.rstrip().lstrip()
 			self.s.proxies = {"http": "http://" + proxy, "https":"https://" + proxy, "ftp":"ftp://" + proxy}
 		f = self.s.get('https://www.instagram.com/web/__mid/')
 	
